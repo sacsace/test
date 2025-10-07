@@ -10,6 +10,11 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Railway 환경에서 포트 설정 확인
+console.log(`Starting server on port: ${PORT}`);
+console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`Database URL: ${process.env.DATABASE_URL ? 'Available' : 'Not available'}`);
+
 // CORS 설정 (Vercel 프론트엔드 허용)
 app.use(cors({
   origin: [
@@ -278,40 +283,48 @@ app.get('/api/user', authenticateToken, async (req, res) => {
   }
 });
 
-// 헬스 체크 엔드포인트
+// 헬스 체크 엔드포인트 (Railway 헬스 체크용)
 app.get('/api/health', async (req, res) => {
   try {
+    const healthStatus = {
+      status: 'OK',
+      message: '서버가 정상적으로 작동 중입니다.',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      port: PORT,
+      database: 'not_connected'
+    };
+
     if (useDatabase && pool) {
-      await pool.query('SELECT 1');
-      res.json({ 
-        status: 'OK', 
-        message: '서버가 정상적으로 작동 중입니다.',
-        database: 'connected',
-        timestamp: new Date().toISOString()
-      });
+      try {
+        await pool.query('SELECT 1');
+        healthStatus.database = 'connected';
+      } catch (dbError) {
+        healthStatus.database = 'error';
+        healthStatus.dbError = dbError.message;
+      }
     } else {
-      res.json({ 
-        status: 'OK', 
-        message: '서버가 정상적으로 작동 중입니다. (메모리 모드)',
-        database: 'memory',
-        timestamp: new Date().toISOString()
-      });
+      healthStatus.database = 'memory_mode';
     }
+
+    res.status(200).json(healthStatus);
   } catch (error) {
-    res.status(500).json({ 
-      status: 'ERROR', 
-      message: '데이터베이스 연결 오류',
-      database: 'disconnected',
-      error: error.message
+    console.error('Health check error:', error);
+    res.status(500).json({
+      status: 'ERROR',
+      message: '서버 상태 확인 중 오류가 발생했습니다.',
+      error: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 });
 
 // 서버 시작
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🗄️ Database mode: ${useDatabase ? 'PostgreSQL' : 'Memory'}`);
   console.log(`🌏 Timezone: ${process.env.TZ || 'UTC'}`);
   console.log(`🔗 CORS enabled for Vercel frontend`);
+  console.log(`✅ Server is ready to accept connections`);
 });
