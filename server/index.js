@@ -10,8 +10,15 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 미들웨어
-app.use(cors());
+// CORS 설정 (Vercel 프론트엔드 허용)
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://your-app-name.vercel.app', // Vercel 도메인으로 변경 필요
+    /\.vercel\.app$/ // 모든 Vercel 앱 허용
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // 메모리 기반 사용자 저장소 (데이터베이스 없이 테스트용)
@@ -300,18 +307,11 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// 정적 파일 서빙 (프로덕션용)
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-  });
-}
-
 // 서버 시작
 app.listen(PORT, () => {
-  console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
-  console.log(`환경: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`데이터베이스 모드: ${useDatabase ? 'PostgreSQL' : 'Memory'}`);
+  console.log(`🚀 Backend server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🗄️ Database mode: ${useDatabase ? 'PostgreSQL' : 'Memory'}`);
+  console.log(`🌏 Timezone: ${process.env.TZ || 'UTC'}`);
+  console.log(`🔗 CORS enabled for Vercel frontend`);
 });

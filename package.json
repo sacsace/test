@@ -1,19 +1,13 @@
 {
   "name": "login-system",
   "version": "1.0.0",
-  "description": "Simple login system with React frontend and Node.js backend",
-  "main": "server/index.js",
+  "description": "Login system with Vercel frontend and Railway backend",
   "scripts": {
-    "start": "cd server && npm start",
-    "build": "cd client && npm run build",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
-    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
-  },
-  "engines": {
-    "node": "18.x",
-    "npm": "9.x"
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
