@@ -101,14 +101,10 @@ try {
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
     });
 
-    // 데이터베이스 연결 및 스키마 생성
+    // 데이터베이스 연결
     pool.on('connect', () => {
       console.log('PostgreSQL 데이터베이스에 연결되었습니다.');
       useDatabase = true;
-      // 스키마 생성을 비동기로 처리 (서버 시작을 블록하지 않음)
-      createDatabaseSchema(pool).catch(error => {
-        console.error('스키마 생성 중 오류:', error);
-      });
     });
 
     pool.on('error', (err) => {
@@ -352,8 +348,33 @@ app.get('/api/health', (req, res) => {
   }
 });
 
+// 데이터베이스 스키마 생성 엔드포인트 (개발용)
+app.post('/api/setup-database', async (req, res) => {
+  if (!useDatabase || !pool) {
+    return res.status(400).json({
+      message: '데이터베이스가 연결되지 않았습니다.',
+      database: 'not_connected'
+    });
+  }
+
+  try {
+    await createDatabaseSchema(pool);
+    res.json({
+      message: '데이터베이스 스키마가 성공적으로 생성되었습니다.',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Database setup error:', error);
+    res.status(500).json({
+      message: '데이터베이스 스키마 생성 중 오류가 발생했습니다.',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // 서버 시작
-const server = app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🗄️ Database mode: ${useDatabase ? 'PostgreSQL' : 'Memory'}`);
@@ -361,6 +382,17 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔗 CORS enabled for Vercel frontend`);
   console.log(`✅ Server is ready to accept connections`);
   console.log(`📍 Health check available at: http://0.0.0.0:${PORT}/api/health`);
+  
+  // 서버 시작 후 데이터베이스 스키마 생성
+  if (useDatabase && pool) {
+    setTimeout(async () => {
+      try {
+        await createDatabaseSchema(pool);
+      } catch (error) {
+        console.error('스키마 생성 실패:', error);
+      }
+    }, 2000); // 2초 후에 스키마 생성
+  }
 });
 
 // 서버 오류 처리
