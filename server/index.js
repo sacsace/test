@@ -53,6 +53,10 @@ const createDatabaseSchema = async (pool) => {
   try {
     console.log('데이터베이스 스키마를 생성합니다...');
     
+    // 연결 테스트
+    await pool.query('SELECT 1');
+    console.log('데이터베이스 연결 확인 완료');
+    
     // users 테이블 생성
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
@@ -64,6 +68,7 @@ const createDatabaseSchema = async (pool) => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+    console.log('users 테이블 생성 완료');
 
     // 샘플 사용자 데이터 삽입
     await pool.query(`
@@ -72,14 +77,17 @@ const createDatabaseSchema = async (pool) => {
       ('testuser', 'test@example.com', '$2b$10$rQZ8K9mN2pL3vX7yE5wB8uJ6kL9mN2pL3vX7yE5wB8uJ6kL9mN2pL3vX')
       ON CONFLICT (username) DO NOTHING
     `);
+    console.log('샘플 사용자 데이터 삽입 완료');
 
     // 인덱스 생성
     await pool.query('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)');
     await pool.query('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
+    console.log('인덱스 생성 완료');
     
     console.log('✅ 데이터베이스 스키마 생성 완료');
   } catch (error) {
     console.error('❌ 데이터베이스 스키마 생성 실패:', error.message);
+    console.error('스택 트레이스:', error.stack);
   }
 };
 
@@ -94,10 +102,13 @@ try {
     });
 
     // 데이터베이스 연결 및 스키마 생성
-    pool.on('connect', async () => {
+    pool.on('connect', () => {
       console.log('PostgreSQL 데이터베이스에 연결되었습니다.');
       useDatabase = true;
-      await createDatabaseSchema(pool);
+      // 스키마 생성을 비동기로 처리 (서버 시작을 블록하지 않음)
+      createDatabaseSchema(pool).catch(error => {
+        console.error('스키마 생성 중 오류:', error);
+      });
     });
 
     pool.on('error', (err) => {
@@ -358,6 +369,16 @@ server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
     console.error(`Port ${PORT} is already in use`);
   }
+});
+
+// 프로세스 오류 처리
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 // Graceful shutdown
