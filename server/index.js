@@ -19,8 +19,9 @@ console.log(`Database URL: ${process.env.DATABASE_URL ? 'Available' : 'Not avail
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://your-app-name.vercel.app', // Vercel 도메인으로 변경 필요
-    /\.vercel\.app$/ // 모든 Vercel 앱 허용
+    'https://test-drab-nu-15.vercel.app', // 실제 Vercel 도메인
+    /\.vercel\.app$/, // 모든 Vercel 앱 허용
+    /\.railway\.app$/ // Railway 앱도 허용
   ],
   credentials: true
 }));
@@ -96,27 +97,34 @@ try {
   const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
   
   if (databaseUrl) {
+    console.log('🗄️ PostgreSQL 데이터베이스 연결 시도 중...');
     pool = new Pool({
       connectionString: databaseUrl,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      // 연결 풀 설정 추가
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
     });
 
-    // 데이터베이스 연결
-    pool.on('connect', () => {
-      console.log('PostgreSQL 데이터베이스에 연결되었습니다.');
-      useDatabase = true;
-    });
-
-    pool.on('error', (err) => {
-      console.log('PostgreSQL 연결 실패, 메모리 저장소를 사용합니다:', err.message);
-      useDatabase = false;
-    });
+    // 데이터베이스 연결 테스트
+    pool.connect()
+      .then(client => {
+        console.log('✅ PostgreSQL 데이터베이스에 연결되었습니다.');
+        useDatabase = true;
+        client.release();
+      })
+      .catch(err => {
+        console.log('❌ PostgreSQL 연결 실패, 메모리 저장소를 사용합니다:', err.message);
+        useDatabase = false;
+        pool = null;
+      });
   } else {
-    console.log('DATABASE_URL이 설정되지 않았습니다. 메모리 저장소를 사용합니다.');
+    console.log('⚠️ DATABASE_URL이 설정되지 않았습니다. 메모리 저장소를 사용합니다.');
     useDatabase = false;
   }
 } catch (error) {
-  console.log('PostgreSQL 설정 실패, 메모리 저장소를 사용합니다:', error.message);
+  console.log('❌ PostgreSQL 설정 실패, 메모리 저장소를 사용합니다:', error.message);
   useDatabase = false;
 }
 
@@ -327,15 +335,28 @@ app.get('/api/user', authenticateToken, async (req, res) => {
 });
 
 // 헬스 체크 엔드포인트 (Railway 헬스 체크용)
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
   try {
+    // 데이터베이스 연결 상태 확인
+    let dbStatus = 'not_connected';
+    if (useDatabase && pool) {
+      try {
+        await pool.query('SELECT 1');
+        dbStatus = 'connected';
+      } catch (error) {
+        dbStatus = 'error';
+        console.error('Database health check failed:', error.message);
+      }
+    }
+
     res.status(200).json({
       status: 'OK',
       message: '서버가 정상적으로 작동 중입니다.',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
       port: PORT,
-      database: useDatabase ? 'PostgreSQL' : 'Memory'
+      database: dbStatus,
+      uptime: process.uptime()
     });
   } catch (error) {
     console.error('Health check error:', error);
@@ -374,24 +395,27 @@ app.post('/api/setup-database', async (req, res) => {
 });
 
 // 서버 시작
-const server = app.listen(PORT, '0.0.0.0', async () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🗄️ Database mode: ${useDatabase ? 'PostgreSQL' : 'Memory'}`);
   console.log(`🌏 Timezone: ${process.env.TZ || 'UTC'}`);
   console.log(`🔗 CORS enabled for Vercel frontend`);
   console.log(`✅ Server is ready to accept connections`);
-  console.log(`📍 Health check available at: http://0.0.0.0:${PORT}/api/health`);
+  console.log(`📍 Health check available at: http://localhost:${PORT}/api/health`);
   
-  // 서버 시작 후 데이터베이스 스키마 생성
+  // 서버 시작 후 데이터베이스 스키마 생성 (비동기로 실행하되 서버 시작을 방해하지 않음)
   if (useDatabase && pool) {
     setTimeout(async () => {
       try {
+        console.log('🗄️ 데이터베이스 스키마 생성 시작...');
         await createDatabaseSchema(pool);
+        console.log('✅ 데이터베이스 스키마 생성 완료');
       } catch (error) {
-        console.error('스키마 생성 실패:', error);
+        console.error('❌ 스키마 생성 실패:', error.message);
+        // 스키마 생성 실패해도 서버는 계속 실행
       }
-    }, 2000); // 2초 후에 스키마 생성
+    }, 3000); // 3초 후에 스키마 생성
   }
 });
 

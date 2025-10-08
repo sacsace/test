@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './Register.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 
+  (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://test-production-asia-southeast1-eqsg3a.railway.app/api');
 
 const Register = ({ onRegister }) => {
   const [formData, setFormData] = useState({
