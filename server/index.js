@@ -48,6 +48,41 @@ let users = [
 let pool = null;
 let useDatabase = false;
 
+// 데이터베이스 스키마 생성 함수
+const createDatabaseSchema = async (pool) => {
+  try {
+    console.log('데이터베이스 스키마를 생성합니다...');
+    
+    // users 테이블 생성
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // 샘플 사용자 데이터 삽입
+    await pool.query(`
+      INSERT INTO users (username, email, password) VALUES 
+      ('admin', 'admin@example.com', '$2b$10$rQZ8K9mN2pL3vX7yE5wB8uJ6kL9mN2pL3vX7yE5wB8uJ6kL9mN2pL3vX'),
+      ('testuser', 'test@example.com', '$2b$10$rQZ8K9mN2pL3vX7yE5wB8uJ6kL9mN2pL3vX7yE5wB8uJ6kL9mN2pL3vX')
+      ON CONFLICT (username) DO NOTHING
+    `);
+
+    // 인덱스 생성
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
+    
+    console.log('✅ 데이터베이스 스키마 생성 완료');
+  } catch (error) {
+    console.error('❌ 데이터베이스 스키마 생성 실패:', error.message);
+  }
+};
+
 try {
   // Railway는 DATABASE_URL 환경변수를 자동으로 제공
   const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
@@ -58,10 +93,11 @@ try {
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
     });
 
-    // 데이터베이스 연결 테스트
-    pool.on('connect', () => {
+    // 데이터베이스 연결 및 스키마 생성
+    pool.on('connect', async () => {
       console.log('PostgreSQL 데이터베이스에 연결되었습니다.');
       useDatabase = true;
+      await createDatabaseSchema(pool);
     });
 
     pool.on('error', (err) => {
