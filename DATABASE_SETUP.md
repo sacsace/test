@@ -59,6 +59,27 @@ psql -h [PGHOST] -p [PGPORT] -U [PGUSER] -d [PGDATABASE]
 \i database/init.sql
 ```
 
-### 방법 3: 서버에서 자동 생성 (권장)
+### 방법 3: API 엔드포인트를 통한 자동 생성 (권장)
 
-서버 코드를 수정하여 시작 시 자동으로 테이블을 생성하도록 하겠습니다:
+서버가 시작된 후 API를 통해 데이터베이스 스키마를 생성할 수 있습니다:
+
+#### 1단계: 서버 상태 확인
+```bash
+curl https://your-railway-app.railway.app/api/health
+```
+
+#### 2단계: 데이터베이스 스키마 생성
+```bash
+curl -X POST https://your-railway-app.railway.app/api/setup-database
+```
+
+#### 3단계: 결과 확인
+성공 응답:
+```json
+{
+  "message": "데이터베이스 스키마가 성공적으로 생성되었습니다.",
+  "timestamp": "2025-10-07T..."
+}
+```
+
+### 방법 4: Railway 대시보드에서 직접 생성
