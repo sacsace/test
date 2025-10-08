@@ -284,30 +284,16 @@ app.get('/api/user', authenticateToken, async (req, res) => {
 });
 
 // 헬스 체크 엔드포인트 (Railway 헬스 체크용)
-app.get('/api/health', async (req, res) => {
+app.get('/api/health', (req, res) => {
   try {
-    const healthStatus = {
+    res.status(200).json({
       status: 'OK',
       message: '서버가 정상적으로 작동 중입니다.',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
       port: PORT,
-      database: 'not_connected'
-    };
-
-    if (useDatabase && pool) {
-      try {
-        await pool.query('SELECT 1');
-        healthStatus.database = 'connected';
-      } catch (dbError) {
-        healthStatus.database = 'error';
-        healthStatus.dbError = dbError.message;
-      }
-    } else {
-      healthStatus.database = 'memory_mode';
-    }
-
-    res.status(200).json(healthStatus);
+      database: useDatabase ? 'PostgreSQL' : 'Memory'
+    });
   } catch (error) {
     console.error('Health check error:', error);
     res.status(500).json({
@@ -320,11 +306,37 @@ app.get('/api/health', async (req, res) => {
 });
 
 // 서버 시작
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🗄️ Database mode: ${useDatabase ? 'PostgreSQL' : 'Memory'}`);
   console.log(`🌏 Timezone: ${process.env.TZ || 'UTC'}`);
   console.log(`🔗 CORS enabled for Vercel frontend`);
   console.log(`✅ Server is ready to accept connections`);
+  console.log(`📍 Health check available at: http://0.0.0.0:${PORT}/api/health`);
+});
+
+// 서버 오류 처리
+server.on('error', (error) => {
+  console.error('Server error:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
