@@ -4,8 +4,8 @@ import './Login.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 
   (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 
-   window.location.hostname.includes('vercel.app') ? 'https://test-production-asia-southeast1-eqsg3a.railway.app/api' :
-   'https://test-production-asia-southeast1-eqsg3a.railway.app/api');
+   window.location.hostname.includes('railway.app') ? 'https://test-production-b0b8.up.railway.app/api' :
+   'https://test-production-b0b8.up.railway.app/api');
 
 const Login = ({ onLogin, onShowRegister }) => {
   const [formData, setFormData] = useState({
