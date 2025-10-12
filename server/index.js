@@ -35,6 +35,22 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// 루트 엔드포인트 (Railway 기본 페이지 대신 우리 앱 표시)
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Login System Backend API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/api/health',
+      login: '/api/login',
+      register: '/api/register',
+      user: '/api/user'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // 메모리 기반 사용자 저장소 (데이터베이스 없이 테스트용)
 let users = [
   {
@@ -342,28 +358,15 @@ app.get('/api/user', authenticateToken, async (req, res) => {
   }
 });
 
-// 헬스 체크 엔드포인트 (Railway 헬스 체크용)
-app.get('/api/health', async (req, res) => {
+// 헬스 체크 엔드포인트 (Railway 헬스 체크용) - 단순화
+app.get('/api/health', (req, res) => {
   try {
-    // 데이터베이스 연결 상태 확인
-    let dbStatus = 'not_connected';
-    if (useDatabase && pool) {
-      try {
-        await pool.query('SELECT 1');
-        dbStatus = 'connected';
-      } catch (error) {
-        dbStatus = 'error';
-        console.error('Database health check failed:', error.message);
-      }
-    }
-
     res.status(200).json({
       status: 'OK',
       message: '서버가 정상적으로 작동 중입니다.',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
       port: PORT,
-      database: dbStatus,
       uptime: process.uptime()
     });
   } catch (error) {
@@ -418,6 +421,10 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`   - GET  /api/user`);
   console.log(`   - GET  /api/health`);
   console.log(`   - POST /api/setup-database`);
+  console.log(`🎯 Railway Healthcheck Configuration:`);
+  console.log(`   - Path: /api/health`);
+  console.log(`   - Timeout: 60 seconds`);
+  console.log(`   - Server binding: 0.0.0.0:${PORT}`);
   
   // 서버 시작 후 데이터베이스 스키마 생성 (비동기로 실행하되 서버 시작을 방해하지 않음)
   if (useDatabase && pool) {
