@@ -6,14 +6,20 @@ const PORT = process.env.PORT || 8080;
 console.log('=== Railway Server Starting ===');
 console.log('PORT:', PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('Current working directory:', process.cwd());
+console.log('Server file path:', __filename);
 console.log('================================');
 
 app.use(express.json());
 
+// 정적 파일 경로 설정 (루트 디렉토리 기준)
+const staticPath = path.join(process.cwd(), 'client/build');
+console.log('Static files path:', staticPath);
+
 // 루트 경로 핸들러
 app.get('/', (req, res) => {
   console.log('Root path accessed, serving React app');
-  const indexPath = path.join(__dirname, 'client/build', 'index.html');
+  const indexPath = path.join(process.cwd(), 'client/build', 'index.html');
   console.log('Serving index.html from:', indexPath);
   res.sendFile(indexPath);
 });
@@ -58,14 +64,12 @@ app.post('/api/register', (req, res) => {
 });
 
 // 정적 파일 서빙
-const staticPath = path.join(__dirname, 'client/build');
-console.log('Static files path:', staticPath);
 app.use(express.static(staticPath));
 
 // React 앱 라우팅
 app.get('*', (req, res) => {
   console.log('Frontend route:', req.path);
-  const indexPath = path.join(__dirname, 'client/build', 'index.html');
+  const indexPath = path.join(process.cwd(), 'client/build', 'index.html');
   res.sendFile(indexPath);
 });
 
