@@ -63,24 +63,6 @@ app.use((req, res, next) => {
 
 console.log('✅ Request logging middleware setup complete');
 
-// 루트 엔드포인트
-app.get('/', (req, res) => {
-  console.log('✅✅✅✅✅ Root endpoint accessed ✅✅✅✅✅');
-  console.log('Sending response for root endpoint');
-  res.json({
-    message: 'Railway server is running!',
-    timestamp: new Date().toISOString(),
-    port: PORT,
-    environment: process.env.NODE_ENV,
-    deployment: 'successful',
-    debug: 'Root endpoint working',
-    publicDomain: process.env.RAILWAY_PUBLIC_DOMAIN,
-    staticUrl: process.env.RAILWAY_STATIC_URL,
-    privateDomain: process.env.RAILWAY_PRIVATE_DOMAIN
-  });
-  console.log('✅ Root endpoint response sent');
-});
-
 console.log('✅ Root route setup complete');
 
 // API 엔드포인트들 (더 명확하게 정의)
