@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 console.log('=== Railway Server Starting ===');
 console.log('PORT:', PORT);
@@ -74,16 +74,42 @@ app.get('*', (req, res) => {
 });
 
 console.log('About to start server...');
-app.listen(PORT, '0.0.0.0', () => {
+
+// 서버 시작
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('✅ Server started successfully!');
   console.log(`📍 Port: ${PORT}`);
   console.log('🚀 Ready!');
   console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🏠 Frontend: http://localhost:${PORT}/`);
-}).on('error', (err) => {
+  
+  // Railway가 서버를 인식할 수 있도록 추가 로그
+  console.log('Server is listening on all interfaces');
+  console.log('Railway should be able to reach this server');
+});
+
+// 에러 핸들링
+server.on('error', (err) => {
   console.error('❌ Server error:', err.message);
   console.error('❌ Error details:', err);
   process.exit(1);
+});
+
+// 프로세스 종료 핸들링
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
 
 console.log('Server setup completed');
