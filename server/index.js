@@ -14,6 +14,12 @@ const PORT = process.env.PORT || 5000;
 console.log(`Starting server on port: ${PORT}`);
 console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 console.log(`Database URL: ${process.env.DATABASE_URL ? 'Available' : 'Not available'}`);
+console.log(`Railway Environment Variables:`);
+console.log(`- PORT: ${process.env.PORT}`);
+console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`- DATABASE_URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
+console.log(`- JWT_SECRET: ${process.env.JWT_SECRET ? 'Set' : 'Not set'}`);
+console.log(`- TZ: ${process.env.TZ}`);
 
 // CORS 설정 (Vercel 프론트엔드 허용)
 app.use(cors({
@@ -395,14 +401,15 @@ app.post('/api/setup-database', async (req, res) => {
 });
 
 // 서버 시작
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🗄️ Database mode: ${useDatabase ? 'PostgreSQL' : 'Memory'}`);
   console.log(`🌏 Timezone: ${process.env.TZ || 'UTC'}`);
   console.log(`🔗 CORS enabled for Vercel frontend`);
   console.log(`✅ Server is ready to accept connections`);
-  console.log(`📍 Health check available at: http://localhost:${PORT}/api/health`);
+  console.log(`📍 Health check available at: http://0.0.0.0:${PORT}/api/health`);
+  console.log(`🌐 Server listening on all interfaces (0.0.0.0:${PORT})`);
   
   // 서버 시작 후 데이터베이스 스키마 생성 (비동기로 실행하되 서버 시작을 방해하지 않음)
   if (useDatabase && pool) {
