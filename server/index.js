@@ -63,6 +63,14 @@ app.use((req, res, next) => {
 
 console.log('✅ Request logging middleware setup complete');
 
+// 모든 미들웨어와 라우트 디버깅
+console.log('🔍 Setting up routes...');
+console.log('📝 Current route stack:', app._router.stack.map(layer => ({
+  name: layer.name,
+  regexp: layer.regexp.toString(),
+  path: layer.route ? layer.route.path : 'middleware'
+})));
+
 console.log('✅ Root route setup complete');
 
 // API 엔드포인트들 (더 명확하게 정의)
@@ -110,6 +118,7 @@ app.use('/api', (req, res, next) => {
 });
 
 console.log('✅ API routes setup complete');
+console.log('📝 Route stack after API routes:', app._router.stack.length);
 
 // 404 핸들러
 app.use('*', (req, res) => {
@@ -173,6 +182,7 @@ if (fs.existsSync(staticPath)) {
 // 정적 파일 서빙
 app.use(express.static(staticPath));
 console.log('✅ Static files serving setup complete');
+console.log('📝 Route stack after static files:', app._router.stack.length);
 
 // SPA 라우팅을 위한 catch-all 핸들러
 app.get('*', (req, res) => {
@@ -203,6 +213,12 @@ app.get('*', (req, res) => {
 });
 
 console.log('✅ SPA routing setup complete');
+console.log('📝 Final route stack:', app._router.stack.length);
+console.log('📝 All routes:', app._router.stack.map(layer => ({
+  name: layer.name,
+  regexp: layer.regexp.toString(),
+  path: layer.route ? layer.route.path : 'middleware'
+})));
 console.log('📝 About to start server...');
 
 // 서버 시작 전 최종 빌드 상태 확인
