@@ -155,6 +155,7 @@ console.log('📝 About to start server...');
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('🎉🎉🎉🎉🎉 SERVER STARTED SUCCESSFULLY! 🎉🎉🎉🎉🎉');
   console.log(`📍 Port: ${PORT}`);
+  console.log(`📍 Host: 0.0.0.0 (all interfaces)`);
   console.log('🚀 Ready for debugging!');
   console.log(`🔗 Test URLs:`);
   console.log(`   - http://localhost:${PORT}/`);
@@ -165,6 +166,10 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🌐 Private Domain: ${process.env.RAILWAY_PRIVATE_DOMAIN}`);
   console.log('🔍 Watch the logs for request details!');
   console.log('🎉🎉🎉🎉🎉 DEPLOYMENT COMPLETE! 🎉🎉🎉🎉🎉');
+  
+  // 서버 주소 정보 출력
+  const address = server.address();
+  console.log('📡 Server listening on:', address);
 }).on('error', (err) => {
   console.error('❌❌❌❌❌ SERVER ERROR ❌❌❌❌❌');
   console.error('Error message:', err.message);
