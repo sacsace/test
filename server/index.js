@@ -1,15 +1,16 @@
-// Railway Node.js 직접 배포용 서버
+# Railway Node.js 직접 배포용 서버 (Docker 없음)
 const express = require('express');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Railway 환경 정보 로깅
-console.log('=== Railway Node.js Environment ===');
+console.log('=== Railway Node.js Direct Deployment ===');
 console.log('PORT:', PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('RAILWAY_BUILDER:', process.env.RAILWAY_BUILDER);
 console.log('Process started at:', new Date().toISOString());
-console.log('===================================');
+console.log('========================================');
 
 // 모든 인터페이스에서 수신 대기
 const HOST = '0.0.0.0';
@@ -19,8 +20,9 @@ app.get('/', (req, res) => {
   console.log('Root endpoint accessed');
   res.json({ 
     status: 'OK', 
-    message: 'Node.js server is running',
+    message: 'Node.js direct deployment running',
     port: PORT,
+    builder: 'NIXPACKS',
     timestamp: new Date().toISOString()
   });
 });
@@ -30,9 +32,10 @@ app.get('/api/health', (req, res) => {
   console.log('Health check endpoint accessed');
   res.status(200).json({ 
     status: 'OK', 
-    message: 'Health check passed',
+    message: 'Health check passed - Node.js direct',
     timestamp: new Date().toISOString(),
-    port: PORT
+    port: PORT,
+    builder: 'NIXPACKS'
   });
 });
 
@@ -90,14 +93,14 @@ app.get('/api/user', (req, res) => {
 });
 
 // 서버 시작
-console.log('Starting Node.js server...');
+console.log('Starting Node.js direct deployment server...');
 const server = app.listen(PORT, HOST, () => {
-  console.log('✅ Node.js server started successfully!');
+  console.log('✅ Node.js direct deployment started!');
   console.log(`📍 Port: ${PORT}`);
   console.log(`🌐 Host: ${HOST}`);
   console.log(`🔗 Health check URL: http://${HOST}:${PORT}/api/health`);
   console.log(`🏠 Root URL: http://${HOST}:${PORT}/`);
-  console.log('🚀 Railway deployment ready!');
+  console.log('🚀 Railway NIXPACKS deployment ready!');
 });
 
 // 에러 핸들링
@@ -114,4 +117,4 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection:', reason);
 });
 
-console.log('📦 Node.js server module loaded');
+console.log('📦 Node.js direct deployment module loaded');
