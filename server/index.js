@@ -410,6 +410,12 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server is ready to accept connections`);
   console.log(`📍 Health check available at: http://0.0.0.0:${PORT}/api/health`);
   console.log(`🌐 Server listening on all interfaces (0.0.0.0:${PORT})`);
+  console.log(`🔍 Available endpoints:`);
+  console.log(`   - POST /api/login`);
+  console.log(`   - POST /api/register`);
+  console.log(`   - GET  /api/user`);
+  console.log(`   - GET  /api/health`);
+  console.log(`   - POST /api/setup-database`);
   
   // 서버 시작 후 데이터베이스 스키마 생성 (비동기로 실행하되 서버 시작을 방해하지 않음)
   if (useDatabase && pool) {
