@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000; // Railway 기본값에 맞춤
 
@@ -150,6 +151,22 @@ app.use('*', (req, res) => {
 });
 
 console.log('✅ 404 handler setup complete');
+
+// React 프론트엔드 서빙 설정
+const staticPath = path.join(process.cwd(), 'client/build');
+console.log('📁 Static files path:', staticPath);
+
+// 정적 파일 서빙
+app.use(express.static(staticPath));
+console.log('✅ Static files serving setup complete');
+
+// SPA 라우팅을 위한 catch-all 핸들러
+app.get('*', (req, res) => {
+  console.log('🌐 SPA route accessed:', req.path);
+  res.sendFile(path.join(staticPath, 'index.html'));
+});
+
+console.log('✅ SPA routing setup complete');
 console.log('📝 About to start server...');
 
 const server = app.listen(PORT, '0.0.0.0', () => {
