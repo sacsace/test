@@ -14,7 +14,7 @@ console.log('Server file path:', __filename);
 app.use(express.json());
 console.log('✅ Middleware setup complete');
 
-// 모든 요청에 대한 상세 로깅 미들웨어
+// 모든 요청에 대한 상세 로깅 미들웨어 (가장 먼저)
 app.use((req, res, next) => {
   console.log('🔥🔥🔥 REQUEST RECEIVED 🔥🔥🔥');
   console.log('Method:', req.method);
@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
 
 console.log('✅ Root route setup complete');
 
-// API 엔드포인트들
+// API 엔드포인트들 (명시적으로 먼저 정의)
 app.get('/api/health', (req, res) => {
   console.log('✅✅✅ Health check endpoint accessed - sending response ✅✅✅');
   res.json({
@@ -69,6 +69,16 @@ app.get('/api/test', (req, res) => {
 });
 
 console.log('✅ API routes setup complete');
+
+// 모든 요청에 대한 로깅 (API가 아닌 경우)
+app.get('*', (req, res, next) => {
+  console.log('🚨🚨🚨 CATCH-ALL GET ROUTE TRIGGERED 🚨🚨🚨');
+  console.log('Request path:', req.path);
+  console.log('Request URL:', req.url);
+  console.log('This should not happen for API routes!');
+  console.log('🚨🚨🚨 END CATCH-ALL LOG 🚨🚨🚨');
+  next();
+});
 
 // 404 핸들러
 app.use('*', (req, res) => {
