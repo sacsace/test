@@ -1,19 +1,14 @@
 {
   "name": "login-system-server",
   "version": "1.0.0",
-  "description": "Railway integrated server for login system",
+  "description": "Railway server for login system",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "cd ../client && npm install && npm run build",
-    "dev": "nodemon index.js",
-    "postinstall": "npm run build"
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
   },
   "engines": {
     "node": ">=18.0.0"
