@@ -1,40 +1,29 @@
-// Railway용 간단한 Express 서버
+// Railway 통합 서버 (백엔드 + 프론트엔드)
 const express = require('express');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-console.log('=== Railway Server Starting ===');
+console.log('=== Railway Integrated Server Starting ===');
 console.log('PORT:', PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('==============================');
+console.log('==========================================');
 
 // 미들웨어
 app.use(express.json());
 
-// 루트 엔드포인트
-app.get('/', (req, res) => {
-  console.log('Root endpoint accessed');
-  res.json({ 
-    status: 'OK', 
-    message: 'Railway Express server is running',
-    port: PORT,
-    timestamp: new Date().toISOString()
-  });
-});
-
-// 헬스체크 엔드포인트
+// API 라우트 (백엔드)
 app.get('/api/health', (req, res) => {
   console.log('Health check endpoint accessed');
   res.status(200).json({ 
     status: 'OK', 
-    message: 'Health check passed',
+    message: 'Railway integrated server is healthy',
     timestamp: new Date().toISOString(),
     port: PORT
   });
 });
 
-// 로그인 엔드포인트
 app.post('/api/login', (req, res) => {
   console.log('Login endpoint accessed');
   const { username, password } = req.body;
@@ -56,7 +45,6 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-// 회원가입 엔드포인트
 app.post('/api/register', (req, res) => {
   console.log('Register endpoint accessed');
   const { username, email, password } = req.body;
@@ -77,7 +65,6 @@ app.post('/api/register', (req, res) => {
   });
 });
 
-// 사용자 정보 엔드포인트
 app.get('/api/user', (req, res) => {
   console.log('User endpoint accessed');
   res.json({
@@ -90,14 +77,23 @@ app.get('/api/user', (req, res) => {
   });
 });
 
+// 정적 파일 서빙 (프론트엔드)
+app.use(express.static(path.join(__dirname, '../client/build')));
+
+// React 앱의 모든 라우트를 index.html로 리디렉션
+app.get('*', (req, res) => {
+  console.log('Frontend route accessed:', req.path);
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+});
+
 // 서버 시작
-console.log('Starting Express server...');
+console.log('Starting Railway integrated server...');
 const server = app.listen(PORT, () => {
-  console.log('✅ Express server started successfully!');
+  console.log('✅ Railway integrated server started successfully!');
   console.log(`📍 Server running on port ${PORT}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🏠 Root: http://localhost:${PORT}/`);
-  console.log('🚀 Railway deployment ready!');
+  console.log(`🔗 API Health: http://localhost:${PORT}/api/health`);
+  console.log(`🏠 Frontend: http://localhost:${PORT}/`);
+  console.log('🚀 Full-stack deployment ready!');
 });
 
 // 에러 핸들링
@@ -114,4 +110,4 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection:', reason);
 });
 
-console.log('📦 Express server module loaded');
+console.log('📦 Railway integrated server module loaded');
