@@ -2,17 +2,31 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-console.log('=== Railway Debug Server Starting ===');
+console.log('🚀🚀🚀 RAILWAY DEPLOYMENT STARTING 🚀🚀🚀');
+console.log('==========================================');
 console.log('PORT:', PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('RAILWAY_ENVIRONMENT:', process.env.RAILWAY_ENVIRONMENT);
 console.log('Current working directory:', process.cwd());
 console.log('Server file path:', __filename);
-console.log('=====================================');
+console.log('Process ID:', process.pid);
+console.log('Node version:', process.version);
+console.log('Platform:', process.platform);
+console.log('Architecture:', process.arch);
+console.log('Memory usage:', process.memoryUsage());
+console.log('Environment variables:');
+console.log('  - PORT:', process.env.PORT);
+console.log('  - NODE_ENV:', process.env.NODE_ENV);
+console.log('  - RAILWAY_ENVIRONMENT:', process.env.RAILWAY_ENVIRONMENT);
+console.log('  - RAILWAY_PROJECT_ID:', process.env.RAILWAY_PROJECT_ID);
+console.log('  - RAILWAY_SERVICE_ID:', process.env.RAILWAY_SERVICE_ID);
+console.log('==========================================');
 
 app.use(express.json());
 
-// 모든 요청에 대한 상세 로깅 미들웨어 (가장 먼저)
+console.log('📝 Setting up middleware...');
+
+// 모든 요청에 대한 상세 로깅 미들웨어
 app.use((req, res, next) => {
   console.log('🔥🔥🔥 REQUEST RECEIVED 🔥🔥🔥');
   console.log('Method:', req.method);
@@ -28,6 +42,8 @@ app.use((req, res, next) => {
   next();
 });
 
+console.log('📝 Setting up routes...');
+
 // 루트 엔드포인트
 app.get('/', (req, res) => {
   console.log('✅✅✅ Root endpoint accessed - sending response ✅✅✅');
@@ -35,7 +51,8 @@ app.get('/', (req, res) => {
     message: 'Railway server is running!',
     timestamp: new Date().toISOString(),
     port: PORT,
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    deployment: 'successful'
   });
 });
 
@@ -46,7 +63,8 @@ app.get('/api/health', (req, res) => {
     status: 'OK',
     message: 'Server is healthy',
     timestamp: new Date().toISOString(),
-    port: PORT
+    port: PORT,
+    deployment: 'successful'
   });
 });
 
@@ -55,9 +73,12 @@ app.get('/api/test', (req, res) => {
   res.json({
     message: 'Test endpoint working',
     timestamp: new Date().toISOString(),
-    port: PORT
+    port: PORT,
+    deployment: 'successful'
   });
 });
+
+console.log('📝 Setting up catch-all routes...');
 
 // 모든 GET 요청에 대한 로깅
 app.get('*', (req, res, next) => {
@@ -85,10 +106,10 @@ app.use('*', (req, res) => {
   });
 });
 
-console.log('About to start server...');
+console.log('📝 About to start server...');
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log('✅ Debug server started successfully!');
+  console.log('🎉🎉🎉 SERVER STARTED SUCCESSFULLY! 🎉🎉🎉');
   console.log(`📍 Port: ${PORT}`);
   console.log('🚀 Ready for debugging!');
   console.log(`🔗 Test URLs:`);
@@ -96,9 +117,12 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`   - http://localhost:${PORT}/api/health`);
   console.log(`   - http://localhost:${PORT}/api/test`);
   console.log('🔍 Watch the logs for request details!');
+  console.log('🎉🎉🎉 DEPLOYMENT COMPLETE! 🎉🎉🎉');
 }).on('error', (err) => {
-  console.error('❌ Server error:', err.message);
-  console.error('❌ Error details:', err);
+  console.error('❌❌❌ SERVER ERROR ❌❌❌');
+  console.error('Error message:', err.message);
+  console.error('Error details:', err);
+  console.error('❌❌❌ END ERROR LOG ❌❌❌');
   process.exit(1);
 });
 
@@ -111,4 +135,5 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection:', reason);
 });
 
-console.log('Debug server setup completed');
+console.log('📝 Debug server setup completed');
+console.log('🚀🚀🚀 RAILWAY DEPLOYMENT READY 🚀🚀🚀');
