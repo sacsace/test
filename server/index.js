@@ -13,6 +13,7 @@ console.log('RAILWAY_SERVICE_ID:', process.env.RAILWAY_SERVICE_ID || 'NOT_SET');
 console.log('RAILWAY_PUBLIC_DOMAIN:', process.env.RAILWAY_PUBLIC_DOMAIN || 'NOT_SET');
 console.log('RAILWAY_STATIC_URL:', process.env.RAILWAY_STATIC_URL || 'NOT_SET');
 console.log('RAILWAY_SERVICE_TEST_URL:', process.env.RAILWAY_SERVICE_TEST_URL || 'NOT_SET');
+console.log('RAILWAY_PRIVATE_DOMAIN:', process.env.RAILWAY_PRIVATE_DOMAIN || 'NOT_SET');
 console.log('Current working directory:', process.cwd());
 console.log('Server file path:', __filename);
 console.log('Process ID:', process.pid);
@@ -45,7 +46,11 @@ app.use((req, res, next) => {
   console.log('X-Forwarded-For:', req.get('x-forwarded-for'));
   console.log('X-Forwarded-Proto:', req.get('x-forwarded-proto'));
   console.log('X-Forwarded-Host:', req.get('x-forwarded-host'));
-  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('X-Real-IP:', req.get('x-real-ip'));
+  console.log('CF-Connecting-IP:', req.get('cf-connecting-ip'));
+  console.log('X-Forwarded-Port:', req.get('x-forwarded-port'));
+  console.log('X-Forwarded-Scheme:', req.get('x-forwarded-scheme'));
+  console.log('All Headers:', JSON.stringify(req.headers, null, 2));
   console.log('Query:', req.query);
   console.log('Body:', req.body);
   console.log('IP:', req.ip);
@@ -69,7 +74,8 @@ app.get('/', (req, res) => {
     deployment: 'successful',
     debug: 'Root endpoint working',
     publicDomain: process.env.RAILWAY_PUBLIC_DOMAIN,
-    staticUrl: process.env.RAILWAY_STATIC_URL
+    staticUrl: process.env.RAILWAY_STATIC_URL,
+    privateDomain: process.env.RAILWAY_PRIVATE_DOMAIN
   });
   console.log('✅ Root endpoint response sent');
 });
@@ -80,7 +86,7 @@ console.log('✅ Root route setup complete');
 app.get('/api/health', (req, res) => {
   console.log('✅✅✅✅✅ Health check endpoint accessed ✅✅✅✅✅');
   console.log('Sending health check response');
-    res.json({
+  res.json({
     status: 'OK',
     message: 'Server is healthy',
     timestamp: new Date().toISOString(),
@@ -88,7 +94,8 @@ app.get('/api/health', (req, res) => {
     deployment: 'successful',
     debug: 'Health endpoint working',
     publicDomain: process.env.RAILWAY_PUBLIC_DOMAIN,
-    staticUrl: process.env.RAILWAY_STATIC_URL
+    staticUrl: process.env.RAILWAY_STATIC_URL,
+    privateDomain: process.env.RAILWAY_PRIVATE_DOMAIN
   });
   console.log('✅ Health check response sent');
 });
@@ -103,7 +110,8 @@ app.get('/api/test', (req, res) => {
     deployment: 'successful',
     debug: 'Test endpoint working',
     publicDomain: process.env.RAILWAY_PUBLIC_DOMAIN,
-    staticUrl: process.env.RAILWAY_STATIC_URL
+    staticUrl: process.env.RAILWAY_STATIC_URL,
+    privateDomain: process.env.RAILWAY_PRIVATE_DOMAIN
   });
   console.log('✅ Test endpoint response sent');
 });
@@ -133,11 +141,12 @@ app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Not Found',
     message: `Route ${req.method} ${req.originalUrl} not found`,
-      timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString(),
     availableRoutes: ['/', '/api/health', '/api/test'],
     debug: 'Route not found',
     publicDomain: process.env.RAILWAY_PUBLIC_DOMAIN,
-    staticUrl: process.env.RAILWAY_STATIC_URL
+    staticUrl: process.env.RAILWAY_STATIC_URL,
+    privateDomain: process.env.RAILWAY_PRIVATE_DOMAIN
   });
 });
 
@@ -154,6 +163,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`   - http://localhost:${PORT}/api/test`);
   console.log(`🌐 Public Domain: ${process.env.RAILWAY_PUBLIC_DOMAIN}`);
   console.log(`🌐 Static URL: ${process.env.RAILWAY_STATIC_URL}`);
+  console.log(`🌐 Private Domain: ${process.env.RAILWAY_PRIVATE_DOMAIN}`);
   console.log('🔍 Watch the logs for request details!');
   console.log('🎉🎉🎉🎉🎉 DEPLOYMENT COMPLETE! 🎉🎉🎉🎉🎉');
 }).on('error', (err) => {
@@ -170,10 +180,20 @@ server.on('connection', (socket) => {
   console.log('🔌 New connection established');
   console.log('Socket remote address:', socket.remoteAddress);
   console.log('Socket remote port:', socket.remotePort);
+  console.log('Socket local address:', socket.localAddress);
+  console.log('Socket local port:', socket.localPort);
 });
 
 server.on('request', (req, res) => {
   console.log('📨 Server received request:', req.method, req.url);
+});
+
+server.on('close', () => {
+  console.log('📝 Server closed');
+});
+
+server.on('error', (err) => {
+  console.error('❌ Server error:', err);
 });
 
 // 프로세스 이벤트 로깅
