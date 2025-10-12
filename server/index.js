@@ -205,6 +205,16 @@ app.get('*', (req, res) => {
 console.log('✅ SPA routing setup complete');
 console.log('📝 About to start server...');
 
+// 서버 시작 전 최종 빌드 상태 확인
+console.log('🔍 Final build status check before server start...');
+console.log('📁 Static path:', staticPath);
+console.log('📁 Static path exists:', fs.existsSync(staticPath));
+if (fs.existsSync(staticPath)) {
+  console.log('📁 Build directory contents:', fs.readdirSync(staticPath));
+  const indexPath = path.join(staticPath, 'index.html');
+  console.log('📁 index.html exists:', fs.existsSync(indexPath));
+}
+
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('🎉🎉🎉🎉🎉 SERVER STARTED SUCCESSFULLY! 🎉🎉🎉🎉🎉');
   console.log(`📍 Port: ${PORT}`);
