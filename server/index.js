@@ -156,6 +156,17 @@ console.log('✅ 404 handler setup complete');
 const staticPath = path.join(process.cwd(), 'client/build');
 console.log('📁 Static files path:', staticPath);
 
+// 빌드 디렉토리 존재 확인
+const fs = require('fs');
+if (fs.existsSync(staticPath)) {
+  console.log('✅ React build directory exists');
+  const files = fs.readdirSync(staticPath);
+  console.log('📁 Build files:', files);
+} else {
+  console.log('❌ React build directory does not exist');
+  console.log('📁 Available directories:', fs.readdirSync(process.cwd()));
+}
+
 // 정적 파일 서빙
 app.use(express.static(staticPath));
 console.log('✅ Static files serving setup complete');
