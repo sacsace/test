@@ -20,6 +20,8 @@ console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`- DATABASE_URL: ${process.env.DATABASE_URL ? 'Set' : 'Not set'}`);
 console.log(`- JWT_SECRET: ${process.env.JWT_SECRET ? 'Set' : 'Not set'}`);
 console.log(`- TZ: ${process.env.TZ}`);
+console.log(`- RAILWAY_STATIC_URL: ${process.env.RAILWAY_STATIC_URL}`);
+console.log(`- RAILWAY_PUBLIC_DOMAIN: ${process.env.RAILWAY_PUBLIC_DOMAIN}`);
 
 // CORS 설정 (Vercel 프론트엔드 허용)
 app.use(cors({

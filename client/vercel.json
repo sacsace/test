@@ -20,5 +20,8 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "REACT_APP_API_URL": "https://test-production-asia-southeast1-eqsg3a.railway.app/api"
+  }
 }
