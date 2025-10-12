@@ -3,7 +3,7 @@
     "rootDirectory": "server"
   },
   "build": {
-    "builder": "DOCKERFILE"
+    "builder": "NIXPACKS"
   },
   "deploy": {
     "startCommand": "npm start",
