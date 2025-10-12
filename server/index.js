@@ -4,7 +4,9 @@ const app = express();
 const PORT = process.env.PORT || 3000; // Railway 기본값에 맞춤
 
 // 최대한 상세한 디버깅 로깅
-console.log('🚀🚀🚀 RAILWAY DEPLOYMENT STARTING 🚀🚀🚀');
+console.log('🚀🚀🚀 RAILWAY DEPLOYMENT STARTING - VERSION 2.0 🚀🚀🚀');
+console.log('==========================================');
+console.log('🔄 FORCE DEPLOYMENT TRIGGERED');
 console.log('==========================================');
 console.log('PORT:', PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -72,6 +74,19 @@ console.log('📝 Current route stack:', app._router.stack.map(layer => ({
 })));
 
 console.log('✅ Root route setup complete');
+
+// 테스트 라우트 추가
+app.get('/test-debug', (req, res) => {
+  console.log('🧪 TEST DEBUG ROUTE ACCESSED');
+  res.json({
+    message: 'Debug route working',
+    timestamp: new Date().toISOString(),
+    version: '2.0',
+    routes: ['/test-debug', '/api/health', '/api/test']
+  });
+});
+
+console.log('✅ Test debug route setup complete');
 
 // API 엔드포인트들 (더 명확하게 정의)
 app.get('/api/health', (req, res) => {
