@@ -2,29 +2,17 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-console.log('🚀🚀🚀 RAILWAY DEPLOYMENT STARTING 🚀🚀🚀');
-console.log('==========================================');
+console.log('🚀 RAILWAY DEPLOYMENT STARTING 🚀');
 console.log('PORT:', PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('RAILWAY_ENVIRONMENT:', process.env.RAILWAY_ENVIRONMENT);
+console.log('RAILWAY_PROJECT_ID:', process.env.RAILWAY_PROJECT_ID || 'NOT_SET');
+console.log('RAILWAY_SERVICE_ID:', process.env.RAILWAY_SERVICE_ID || 'NOT_SET');
 console.log('Current working directory:', process.cwd());
 console.log('Server file path:', __filename);
-console.log('Process ID:', process.pid);
-console.log('Node version:', process.version);
-console.log('Platform:', process.platform);
-console.log('Architecture:', process.arch);
-console.log('Memory usage:', process.memoryUsage());
-console.log('Environment variables:');
-console.log('  - PORT:', process.env.PORT);
-console.log('  - NODE_ENV:', process.env.NODE_ENV);
-console.log('  - RAILWAY_ENVIRONMENT:', process.env.RAILWAY_ENVIRONMENT);
-console.log('  - RAILWAY_PROJECT_ID:', process.env.RAILWAY_PROJECT_ID);
-console.log('  - RAILWAY_SERVICE_ID:', process.env.RAILWAY_SERVICE_ID);
-console.log('==========================================');
 
 app.use(express.json());
-
-console.log('📝 Setting up middleware...');
+console.log('✅ Middleware setup complete');
 
 // 모든 요청에 대한 상세 로깅 미들웨어
 app.use((req, res, next) => {
@@ -42,7 +30,7 @@ app.use((req, res, next) => {
   next();
 });
 
-console.log('📝 Setting up routes...');
+console.log('✅ Request logging middleware setup complete');
 
 // 루트 엔드포인트
 app.get('/', (req, res) => {
@@ -55,6 +43,8 @@ app.get('/', (req, res) => {
     deployment: 'successful'
   });
 });
+
+console.log('✅ Root route setup complete');
 
 // API 엔드포인트들
 app.get('/api/health', (req, res) => {
@@ -78,17 +68,7 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-console.log('📝 Setting up catch-all routes...');
-
-// 모든 GET 요청에 대한 로깅
-app.get('*', (req, res, next) => {
-  console.log('🚨🚨🚨 CATCH-ALL GET ROUTE TRIGGERED 🚨🚨🚨');
-  console.log('Request path:', req.path);
-  console.log('Request URL:', req.url);
-  console.log('This should not happen for API routes!');
-  console.log('🚨🚨🚨 END CATCH-ALL LOG 🚨🚨🚨');
-  next();
-});
+console.log('✅ API routes setup complete');
 
 // 404 핸들러
 app.use('*', (req, res) => {
@@ -106,6 +86,7 @@ app.use('*', (req, res) => {
   });
 });
 
+console.log('✅ 404 handler setup complete');
 console.log('📝 About to start server...');
 
 const server = app.listen(PORT, '0.0.0.0', () => {
@@ -124,15 +105,6 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.error('Error details:', err);
   console.error('❌❌❌ END ERROR LOG ❌❌❌');
   process.exit(1);
-});
-
-// 프로세스 이벤트 로깅
-process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection:', reason);
 });
 
 console.log('📝 Debug server setup completed');
