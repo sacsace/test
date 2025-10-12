@@ -1,41 +1,33 @@
-# Railway Node.js 직접 배포용 서버 (Docker 없음)
+// 간단한 Node.js 서버 (Docker 없음)
 const express = require('express');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Railway 환경 정보 로깅
-console.log('=== Railway Node.js Direct Deployment ===');
-console.log('PORT:', PORT);
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('RAILWAY_BUILDER:', process.env.RAILWAY_BUILDER);
-console.log('Process started at:', new Date().toISOString());
-console.log('========================================');
+console.log('🚀 Starting simple Node.js server...');
+console.log('📍 Port:', PORT);
+console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
 
-// 모든 인터페이스에서 수신 대기
-const HOST = '0.0.0.0';
+// 미들웨어
+app.use(express.json());
 
 // 루트 엔드포인트
 app.get('/', (req, res) => {
-  console.log('Root endpoint accessed');
   res.json({ 
     status: 'OK', 
-    message: 'Node.js direct deployment running',
+    message: 'Simple Node.js server running',
     port: PORT,
-    builder: 'NIXPACKS',
     timestamp: new Date().toISOString()
   });
 });
 
-// 헬스체크 엔드포인트 (Railway 헬스체크용)
+// 헬스체크 엔드포인트
 app.get('/api/health', (req, res) => {
-  console.log('Health check endpoint accessed');
   res.status(200).json({ 
     status: 'OK', 
-    message: 'Health check passed - Node.js direct',
+    message: 'Health check passed',
     timestamp: new Date().toISOString(),
-    port: PORT,
-    builder: 'NIXPACKS'
+    port: PORT
   });
 });
 
@@ -93,14 +85,11 @@ app.get('/api/user', (req, res) => {
 });
 
 // 서버 시작
-console.log('Starting Node.js direct deployment server...');
-const server = app.listen(PORT, HOST, () => {
-  console.log('✅ Node.js direct deployment started!');
-  console.log(`📍 Port: ${PORT}`);
-  console.log(`🌐 Host: ${HOST}`);
-  console.log(`🔗 Health check URL: http://${HOST}:${PORT}/api/health`);
-  console.log(`🏠 Root URL: http://${HOST}:${PORT}/`);
-  console.log('🚀 Railway NIXPACKS deployment ready!');
+const server = app.listen(PORT, () => {
+  console.log('✅ Server started successfully!');
+  console.log(`📍 Running on port ${PORT}`);
+  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🏠 Root: http://localhost:${PORT}/`);
 });
 
 // 에러 핸들링
@@ -117,4 +106,4 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection:', reason);
 });
 
-console.log('📦 Node.js direct deployment module loaded');
+console.log('📦 Server module loaded');
