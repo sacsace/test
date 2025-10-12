@@ -1,106 +1,45 @@
+// Railway 헬스체크 문제 진단용 최소 서버
 const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 기본 미들웨어
-app.use(cors());
-app.use(express.json());
-
-// Railway 환경 정보 로깅
-console.log('=== Railway Environment Info ===');
-console.log('PORT:', process.env.PORT);
+console.log('=== Railway Debug Info ===');
+console.log('PORT:', PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('RAILWAY_STATIC_URL:', process.env.RAILWAY_STATIC_URL);
-console.log('RAILWAY_PUBLIC_DOMAIN:', process.env.RAILWAY_PUBLIC_DOMAIN);
-console.log('================================');
+console.log('Process started at:', new Date().toISOString());
+console.log('========================');
 
-// 루트 엔드포인트
+// 가장 간단한 루트 엔드포인트
 app.get('/', (req, res) => {
-  res.json({
-    message: 'Login System Backend API',
-    version: '1.0.0',
-    status: 'running',
-    timestamp: new Date().toISOString(),
+  console.log('Root endpoint accessed');
+  res.json({ 
+    status: 'OK', 
+    message: 'Server is running',
     port: PORT,
-    environment: process.env.NODE_ENV || 'development'
+    timestamp: new Date().toISOString()
   });
 });
 
-// 헬스체크 엔드포인트 (Railway용)
+// 가장 간단한 헬스체크 엔드포인트
 app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    message: 'Server is healthy',
+  console.log('Health check endpoint accessed');
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'Health check passed',
     timestamp: new Date().toISOString(),
-    port: PORT,
-    uptime: process.uptime()
-  });
-});
-
-// 로그인 엔드포인트 (간단한 버전)
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  
-  if (username === 'admin' && password === 'password123') {
-    res.json({
-      message: 'Login successful',
-      token: 'dummy_token_123',
-      user: {
-        id: 1,
-        username: 'admin',
-        email: 'admin@example.com'
-      }
-    });
-  } else {
-    res.status(401).json({
-      message: 'Invalid credentials'
-    });
-  }
-});
-
-// 회원가입 엔드포인트 (간단한 버전)
-app.post('/api/register', (req, res) => {
-  const { username, email, password } = req.body;
-  
-  if (!username || !email || !password) {
-    return res.status(400).json({
-      message: 'All fields are required'
-    });
-  }
-  
-  res.status(201).json({
-    message: 'Registration successful',
-    user: {
-      id: 2,
-      username,
-      email
-    }
-  });
-});
-
-// 사용자 정보 엔드포인트
-app.get('/api/user', (req, res) => {
-  res.json({
-    user: {
-      id: 1,
-      username: 'admin',
-      email: 'admin@example.com',
-      created_at: new Date().toISOString()
-    }
+    port: PORT
   });
 });
 
 // 서버 시작
+console.log('Starting server...');
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log('🚀 Server started successfully!');
+  console.log('✅ Server started successfully!');
   console.log(`📍 Port: ${PORT}`);
   console.log(`🌐 Listening on: 0.0.0.0:${PORT}`);
-  console.log(`🔗 Health check: http://0.0.0.0:${PORT}/api/health`);
-  console.log(`🏠 Root endpoint: http://0.0.0.0:${PORT}/`);
-  console.log('✅ All endpoints ready!');
+  console.log(`🔗 Health check URL: http://0.0.0.0:${PORT}/api/health`);
+  console.log(`🏠 Root URL: http://0.0.0.0:${PORT}/`);
 });
 
 // 에러 핸들링
@@ -114,7 +53,7 @@ process.on('uncaughtException', (error) => {
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error('❌ Unhandled Rejection:', reason);
 });
 
-console.log('📦 Server module loaded successfully');
+console.log('📦 Server module loaded');
