@@ -13,6 +13,14 @@ console.log('================================');
 
 app.use(express.json());
 
+// 루트 경로 핸들러 (명시적)
+app.get('/', (req, res) => {
+  console.log('Root path accessed, serving React app');
+  const indexPath = path.join(__dirname, '../client/build', 'index.html');
+  console.log('Serving index.html from:', indexPath);
+  res.sendFile(indexPath);
+});
+
 // API 라우트
 app.get('/api/health', (req, res) => {
   console.log('Health check accessed');
@@ -57,7 +65,7 @@ const staticPath = path.join(__dirname, '../client/build');
 console.log('Static files path:', staticPath);
 app.use(express.static(staticPath));
 
-// React 앱 라우팅
+// React 앱 라우팅 (API가 아닌 모든 경로)
 app.get('*', (req, res) => {
   console.log('Frontend route:', req.path);
   const indexPath = path.join(__dirname, '../client/build', 'index.html');
