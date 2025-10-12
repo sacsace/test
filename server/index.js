@@ -140,13 +140,34 @@ console.log('📁 Static files path:', staticPath);
 
 // 빌드 디렉토리 존재 확인
 const fs = require('fs');
+console.log('🔍 Checking React build directory...');
+console.log('📁 Current working directory:', process.cwd());
+console.log('📁 Static path to check:', staticPath);
+
 if (fs.existsSync(staticPath)) {
   console.log('✅ React build directory exists');
   const files = fs.readdirSync(staticPath);
   console.log('📁 Build files:', files);
+  
+  // index.html 파일 확인
+  const indexPath = path.join(staticPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    console.log('✅ index.html exists in build directory');
+  } else {
+    console.log('❌ index.html missing in build directory');
+  }
 } else {
   console.log('❌ React build directory does not exist');
-  console.log('📁 Available directories:', fs.readdirSync(process.cwd()));
+  console.log('📁 Available directories in root:', fs.readdirSync(process.cwd()));
+  
+  // client 디렉토리 확인
+  const clientPath = path.join(process.cwd(), 'client');
+  if (fs.existsSync(clientPath)) {
+    console.log('📁 Client directory exists');
+    console.log('📁 Client directory contents:', fs.readdirSync(clientPath));
+  } else {
+    console.log('❌ Client directory does not exist');
+  }
 }
 
 // 정적 파일 서빙
@@ -156,7 +177,29 @@ console.log('✅ Static files serving setup complete');
 // SPA 라우팅을 위한 catch-all 핸들러
 app.get('*', (req, res) => {
   console.log('🌐 SPA route accessed:', req.path);
-  res.sendFile(path.join(staticPath, 'index.html'));
+  console.log('🌐 Static path:', staticPath);
+  console.log('🌐 Index.html path:', path.join(staticPath, 'index.html'));
+  
+  // index.html 파일 존재 확인
+  const indexPath = path.join(staticPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    console.log('✅ index.html exists, sending file');
+    res.sendFile(indexPath);
+  } else {
+    console.log('❌ index.html does not exist');
+    console.log('📁 Static directory contents:', fs.existsSync(staticPath) ? fs.readdirSync(staticPath) : 'Directory does not exist');
+    res.status(404).json({
+      error: 'React build not found',
+      message: 'React frontend build files are missing',
+      timestamp: new Date().toISOString(),
+      staticPath: staticPath,
+      indexPath: indexPath,
+      staticPathExists: fs.existsSync(staticPath),
+      indexPathExists: fs.existsSync(indexPath),
+      availableRoutes: ['/api/health', '/api/test'],
+      debug: 'React build files missing - check build process'
+    });
+  }
 });
 
 console.log('✅ SPA routing setup complete');
