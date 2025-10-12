@@ -82,11 +82,11 @@ app.get('/', (req, res) => {
 
 console.log('✅ Root route setup complete');
 
-// API 엔드포인트들
+// API 엔드포인트들 (더 명확하게 정의)
 app.get('/api/health', (req, res) => {
   console.log('✅✅✅✅✅ Health check endpoint accessed ✅✅✅✅✅');
   console.log('Sending health check response');
-  res.json({
+    res.json({
     status: 'OK',
     message: 'Server is healthy',
     timestamp: new Date().toISOString(),
@@ -116,18 +116,17 @@ app.get('/api/test', (req, res) => {
   console.log('✅ Test endpoint response sent');
 });
 
-console.log('✅ API routes setup complete');
-
-// Catch-all 라우트 로깅
-app.get('*', (req, res, next) => {
-  console.log('🚨🚨🚨🚨🚨 CATCH-ALL GET ROUTE TRIGGERED 🚨🚨🚨🚨🚨');
+// API 라우트 그룹 (더 명확하게)
+app.use('/api', (req, res, next) => {
+  console.log('🚨🚨🚨🚨🚨 API ROUTE GROUP TRIGGERED 🚨🚨🚨🚨🚨');
   console.log('Request path:', req.path);
   console.log('Request URL:', req.url);
-  console.log('This should not happen for API routes!');
-  console.log('Available routes: /, /api/health, /api/test');
-  console.log('🚨🚨🚨🚨🚨 END CATCH-ALL LOG 🚨🚨🚨🚨🚨');
+  console.log('This should not happen for defined API routes!');
+  console.log('🚨🚨🚨🚨🚨 END API ROUTE GROUP LOG 🚨🚨🚨🚨🚨');
   next();
 });
+
+console.log('✅ API routes setup complete');
 
 // 404 핸들러
 app.use('*', (req, res) => {
