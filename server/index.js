@@ -198,27 +198,44 @@ server.on('error', (err) => {
 // 프로세스 이벤트 로깅
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error);
+  console.error('Stack:', error.stack);
+  // 서버를 종료하지 않고 계속 실행
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection:', reason);
+  console.error('Promise:', promise);
+  // 서버를 종료하지 않고 계속 실행
 });
 
 process.on('SIGTERM', () => {
   console.log('📝 SIGTERM received, shutting down gracefully');
+  console.log('📝 Reason: Railway requested shutdown');
   server.close(() => {
-    console.log('📝 Server closed');
+    console.log('📝 Server closed gracefully');
     process.exit(0);
   });
 });
 
 process.on('SIGINT', () => {
   console.log('📝 SIGINT received, shutting down gracefully');
+  console.log('📝 Reason: Manual shutdown');
   server.close(() => {
-    console.log('📝 Server closed');
+    console.log('📝 Server closed gracefully');
     process.exit(0);
   });
 });
+
+// 서버 안정성 모니터링
+setInterval(() => {
+  const memUsage = process.memoryUsage();
+  console.log('📊 Memory usage:', {
+    rss: Math.round(memUsage.rss / 1024 / 1024) + 'MB',
+    heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024) + 'MB',
+    heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024) + 'MB',
+    external: Math.round(memUsage.external / 1024 / 1024) + 'MB'
+  });
+}, 30000); // 30초마다 메모리 사용량 로깅
 
 console.log('📝 Debug server setup completed');
 console.log('🚀🚀🚀🚀🚀 RAILWAY DEPLOYMENT READY 🚀🚀🚀🚀🚀');
